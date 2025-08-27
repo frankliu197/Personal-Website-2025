@@ -1,11 +1,10 @@
 <template>
   <div id="app">
     <NavBar />
-
     <Hero />
     <About />
-    <Resume />
     <Services />
+    <Resume />
     <Portfolio />
     <Contact />
 

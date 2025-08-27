@@ -14,10 +14,14 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
+    "@intlify/unplugin-vue-i18n": "^6.0.8",
+    "@intlify/vue-i18n-loader": "^5.0.1",
     "@popperjs/core": "^2.11.8",
-    "bootstrap": "^5.3.7",
+    "bootstrap": "^5.3.8",
     "bootstrap-vue-3": "^0.5.1",
-    "vue": "^3.5.18"
+    "lucide-vue-next": "^0.542.0",
+    "vue": "^3.5.18",
+    "vue-i18n": "^9.14.5"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",

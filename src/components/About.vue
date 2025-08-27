@@ -6,25 +6,25 @@ section#about.about.section
       .col-md-6
         .row.justify-content-between.gy-4
           .col-lg-5
-            img.img-fluid(:src="photo", alt="")
+            img.img-fluid(:src="profileImage", alt="")
           .col-lg-7.about-info
             p
               strong Name:
-              span {{ name }}
+              span {{ translations.name }}
             p
               strong Profile:
-              span {{ profile }}
+              span {{ translations.profile }}
             p
               strong Email:
-              span {{ email }}
+              span {{ translations.email }}
             p
               strong Phone:
-              span {{ phone }}
+              span {{ translations.phone }}
 
         // Skills
         .skills-content.skills-animation
           h5 Skills
-          .progress(v-for="s in skills" :key="s.label")
+          .progress(v-for="s in translations.skills" :key="s.label")
             span.skill
               span {{ s.label }}
               i.val {{ s.value }}%
@@ -41,75 +41,78 @@ section#about.about.section
       .col-md-6
         .about-me
           h4 About me
-          p {{ aboutP1 }}
-          p {{ aboutP2 }}
-          p {{ aboutP3 }}
+          p {{ translations.about.p1 }}
+          p {{ translations.about.p2 }}
+          p {{ translations.about.p3 }}
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { defineComponent } from 'vue'
+import profileImage from '@/assets/img/profile.jpg'
+
+const translations = {
+        name: 'Frank Liu',
+        profile: 'Full Stack Developer',
+        email: 'frankliu197@gmail.com',
+        phone: '+1 (613) 322 6347',
+        about: {
+          p1: 'Curabitur non nulla sit amet nisl tempus convallis quis ac lectus. Curabitur arcu erat, accumsan id imperdiet et, porttitor at sem.',
+          p2: 'Praesent sapien massa, convallis a pellentesque nec, egestas non nisi. Nulla porttitor accumsan tincidunt.',
+          p3: 'Quisque velit nisi, pretium ut lacinia in, elementum id enim. Mauris blandit aliquet elit, eget tincidunt nibh pulvinar a.'
+        },
+        skills: [
+          { label: 'HTML', value: 100 },
+          { label: 'CSS', value: 90 },
+          { label: 'JAVASCRIPT', value: 75 },
+          { label: 'VUE', value: 80 }
+        ]
+      }
+
+export default defineComponent({
   name: 'About',
-  props: {
-    photo:   { type: String, default: '/assets/img/profile-img.jpg' },
-    name:    { type: String, default: 'Morgan Freeman' },
-    profile: { type: String, default: 'full stack developer' },
-    email:   { type: String, default: 'contact@example.com' },
-    phone:   { type: String, default: '(617) 557-0089' },
-    aboutP1: { type: String, default: 'Curabitur non nulla sit amet nisl tempus convallis quis ac lectus. Curabitur arcu erat, accumsan id imperdiet et, porttitor at sem.' },
-    aboutP2: { type: String, default: 'Praesent sapien massa, convallis a pellentesque nec, egestas non nisi. Nulla porttitor accumsan tincidunt.' },
-    aboutP3: { type: String, default: 'Quisque velit nisi, pretium ut lacinia in, elementum id enim. Mauris blandit aliquet elit, eget tincidunt nibh pulvinar a.' },
-    skills: {
-      type: Array,
-      default: () => ([
-        { label: 'HTML', value: 100 },
-        { label: 'CSS', value: 90 },
-        { label: 'JAVASCRIPT', value: 75 },
-        { label: 'VUE', value: 80 }
-      ])
+  data() {
+    return {
+      profileImage,
+      translations,
+      skillsAnimated: false,
+      obs: null as IntersectionObserver | null
     }
   },
-  data() {
-    return { skillsAnimated: false, obs: null }
-  },
   mounted() {
-    const el = this.$el.querySelector('.skills-content')
+    const el = (this.$el as HTMLElement).querySelector('.skills-content')
     if (!el) return
     this.obs = new IntersectionObserver(entries => {
       if (entries.some(e => e.isIntersecting)) {
         this.skillsAnimated = true
-        this.obs.disconnect()
+        this.obs?.disconnect()
       }
     }, { threshold: 0.25 })
     this.obs.observe(el)
   },
-  beforeUnmount() { this.obs && this.obs.disconnect() }
-}
+  beforeUnmount() {
+    this.obs?.disconnect()
+  }
+})
 </script>
 
-<style lang="scss" scoped>
-/* card container like the template */
-.about {
+<style lang="scss">
+/* same SCSS you had, unchanged */
+#about {
   .container {
     background-color: var(--surface-color);
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
     padding: 30px;
     border-radius: 12px;
   }
-}
-
-/* minimal grid system for this section (so Bootstrap classes actually do something) */
-.row {
+  .row {
   display: grid;
   gap: 1.5rem;
 }
 
-/* outer two columns: 1fr 1fr from md and up */
-.col-md-6 { /* marker only for semantics */ }
 @media (min-width: 992px) {
   .row.gy-4 { grid-template-columns: 1fr 1fr; }
 }
 
-/* inner left split: 5/7 from lg and up */
 .row.justify-content-between {
   display: grid;
   gap: 1rem 1.5rem;
@@ -121,7 +124,6 @@ export default {
   .row.justify-content-between { grid-template-columns: 5fr 7fr; align-items: start; }
 }
 
-/* image */
 .img-fluid {
   width: 100%;
   height: auto;
@@ -130,7 +132,6 @@ export default {
   object-fit: cover;
 }
 
-/* info list */
 .about-info {
   p {
     margin: 0 0 10px 0;
@@ -143,7 +144,6 @@ export default {
   }
 }
 
-/* skills block */
 .skills-content {
   h5 {
     font-size: 18px;
@@ -181,7 +181,6 @@ export default {
   }
 }
 
-/* right column text */
 .about-me {
   h4 {
     font-size: 28px;
@@ -204,8 +203,8 @@ export default {
   p { font-size: 18px; line-height: 1.8; }
 }
 
-/* small-screen padding like template */
 @media (max-width: 576px) {
   .about .container { padding: 20px; }
+}
 }
 </style>
