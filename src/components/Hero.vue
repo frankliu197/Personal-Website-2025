@@ -1,13 +1,21 @@
 <template lang="pug">
-section#hero.hero.section.dark-background(
-  :class="{ animate: isMounted }"
-  :style="{ '--header-h': headerOffset + 'px' }"
+section#hero.position-relative.d-flex.align-items-center.justify-content-center.text-center.overflow-hidden.text-white(
+  :class="{ 'animate': isMounted }"
+  :style="{ minHeight: `calc(100dvh - var(--header-h, 0px))`, '--header-h': headerOffset + 'px' }"
 )
-  img.bg(:src="heroImage" alt="" )
+  img.bg.position-absolute.top-0.start-0.w-100.h-100.object-fit-cover(
+    :src="heroImage"
+    alt=""
+    style="z-index:1;"
+  )
 
-  .hero-center
-    h2 Frank Liu
-    p
+  .position-absolute.top-0.start-0.w-100.h-100.bg-black(
+    style="--bs-bg-opacity:.7; z-index:2;"
+  )
+
+  .hero-center.position-relative(style="z-index:3;")
+    h1.display-3.fw-bold.mb-2.text-white Frank Liu
+    p.fs-2.fw-semibold.mb-0.text-white
       span.typed {{ typedText }}
 </template>
 
@@ -20,7 +28,7 @@ export default defineComponent({
   data() {
     return {
       heroImage,
-      typedItems: ['Full Stack Engineer', 'Freelancer'],
+      typedItems: ['Full Stack Engineer', 'Freelancer', 'Software Sales Representative'],
       headerOffset: 0,
       isMounted: false,
       typedText: '',
@@ -72,95 +80,28 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 #hero {
-  width: 100%;
-  /* modern full-height viewport handling */
-  min-height: calc(100vh  - var(--header-h, 0px));
-  min-height: calc(100svh - var(--header-h, 0px));
-  min-height: calc(100dvh - var(--header-h, 0px));
-
-  position: relative;
-  padding: 60px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  > .bg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: 1;
-  }
-
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: color-mix(in srgb, var(--background-color, #0a0a0a), transparent 30%);
-    z-index: 2;
-  }
-
-  .hero-center {
-    position: relative;
-    z-index: 3;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    opacity: 0;
-    transform: translateY(12px);
-
-    h2 {
-      margin: 0 0 8px;
-      font-size: 64px;
-      font-weight: 700;
-      color: var(--heading-color, #ffffff);
-    }
-
-    p {
-      margin: 5px 0 0 0;
-      font-size: 36px;
-      font-weight: 600;
-      color: var(--default-color, #ffffff);
-
-      .typed {
-        position: relative;
-        padding-right: 6px;
-
-        &::after {
-          content: "";
-          display: inline-block;
-          width: 2px;
-          height: 1em;
-          vertical-align: -0.15em;
-          margin-left: 4px;
-          background: currentColor;
-          animation: caret 0.9s steps(1) infinite;
-        }
-      }
-    }
-  }
-
+  // animations toggle
   &.animate {
     .hero-center { animation: fade-up 600ms ease forwards 120ms; }
     > .bg { animation: kenburns 14s ease-out both; }
   }
 
-  @media (max-width: 992px) {
-    .hero-center {
-      h2 { font-size: 42px; }
-      p  { font-size: 22px; }
-    }
-  }
-  @media (max-width: 600px) {
-    padding: 40px 0;
-    .hero-center {
-      h2 { font-size: 34px; }
-      p  { font-size: 18px; }
+  // type caret
+  .typed {
+    position: relative;
+    padding-right: 6px;
+
+    &::after {
+      content: "";
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      vertical-align: -0.15em;
+      margin-left: 4px;
+      background: currentColor;
+      animation: caret 0.9s steps(1) infinite;
     }
   }
 
@@ -168,8 +109,9 @@ export default defineComponent({
   @keyframes fade-up { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: translateY(0) } }
   @keyframes kenburns { from { transform: scale(1) } to { transform: scale(1.06) } }
 
+  // reduced motion
   @media (prefers-reduced-motion: reduce) {
-    .hero.animate {
+    &.animate {
       .hero-center, > .bg { animation: none !important; opacity: 1; transform: none; }
     }
   }

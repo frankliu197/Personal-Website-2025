@@ -1,120 +1,100 @@
 <template lang="pug">
-section#contact.contact.section
-  .container.section-title
-    h2 Contact
-    p Reach out to me
-
+section#contact
+  .section-header
+    .title Contact
+    .subtitle Let's build your next idea
   .container
-    .row.gy-4
-      .col-lg-4.col-md-6(
+    .row.g-4(ref="gridEl")
+      .col-lg-4.col-md-6.contact-reveal(
         v-for="(c, i) in contacts"
         :key="i"
+        :class="{ 'is-visible': visible[i] }"
+        :style="{ '--dx': (i % 2 === 0 ? '18px' : '-18px'), transitionDelay: (i * 90) + 'ms' }"
       )
-        .info-item
-          .icon
-            component(:is="c.icon" size="22" stroke-width="2" aria-hidden="true")
-          h3 {{ c.title }}
-          p
-            a(:href="c.href" target="_blank" rel="noopener") {{ c.label }}
+        FLCard.text-decoration-none.link-body-emphasis(
+          :icon="c.icon"
+          :title="c.title"
+          :desc="c.label"
+          :href="c.href"
+          target="_blank"
+          rel="noopener"
+          :chip-size="44"
+          :icon-size="22"
+        )
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { Linkedin, Mail, MessageCircle } from "lucide-vue-next"
+import FLCard from '@/components/FLCard.vue'
+import { Linkedin, Mail, MessageCircle } from 'lucide-vue-next'
 
-export default defineComponent({
+export default {
   name: 'Contact',
-  components: { Linkedin, Mail, MessageCircle },
+  components: { FLCard },
   data() {
     const email = 'frankliu197@gmail.com'
     const linkedinUrl = 'https://www.linkedin.com/in/frankliu197'
     const linkedinLabel = 'linkedin.com/in/frankliu197'
     const whatsapp = '+1 613 322 6347'
     const whatsappMessage = 'Hi Frank, I found your portfolio and would like to chat.'
-    const whatsappHref = `https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(
-      whatsappMessage
-    )}`
+    const whatsappHref = `https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappMessage)}`
 
     return {
       contacts: [
-        {
-          icon: Linkedin,
-          title: 'LinkedIn',
-          label: linkedinLabel,
-          href: linkedinUrl
-        },
-        {
-          icon: Mail,
-          title: 'Email',
-          label: email,
-          href: `mailto:${email}`
-        },
-        {
-          icon: MessageCircle,
-          title: 'WhatsApp',
-          label: whatsapp,
-          href: whatsappHref
-        }
-      ]
+        { icon: Linkedin, title: 'LinkedIn', label: linkedinLabel, href: linkedinUrl },
+        { icon: Mail, title: 'Email', label: email, href: `mailto:${email}` },
+        { icon: MessageCircle, title: 'WhatsApp', label: whatsapp, href: whatsappHref }
+      ],
+      gridEl: null as HTMLElement | null,
+      visible: [] as boolean[],
+      obs: null as IntersectionObserver | null
     }
+  },
+  mounted() {
+    const items = (this.$refs.gridEl as HTMLElement)?.querySelectorAll<HTMLElement>('.contact-reveal')
+    if (!items) return
+
+    if (!('IntersectionObserver' in window)) {
+      this.visible = this.contacts.map(() => true)
+      return
+    }
+
+    this.obs = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const idx = Number((entry.target as HTMLElement).dataset.index)
+          if (!Number.isNaN(idx)) this.visible[idx] = true
+          this.obs?.unobserve(entry.target)
+        }
+      })
+    }, { threshold: 0.2 })
+
+    items.forEach((el, i) => {
+      el.dataset.index = String(i)
+      this.obs!.observe(el)
+    })
+  },
+  beforeUnmount() {
+    this.obs?.disconnect()
   }
-})
+}
 </script>
 
 <style lang="scss">
 #contact {
-  .row {
-    display: grid;
-    gap: 1.5rem;
-
-    @media (min-width: 768px) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    @media (min-width: 992px) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .contact-reveal {
+    opacity: 0;
+    transform: translateX(var(--dx, 20px)) translateY(10px) scale(0.97);
+    filter: blur(6px);
+    transition:
+      opacity .5s ease,
+      transform .5s ease,
+      filter .4s ease;
+    will-change: opacity, transform, filter;
   }
-
-  .info-item {
-    background: var(--surface-color);
-    border: 1px solid color-mix(in srgb, var(--default-color), transparent 88%);
-    border-radius: 12px;
-    padding: 22px 20px;
-    height: 100%;
-    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-
-    .icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 10px;
-      color: var(--accent-color);
-      background: color-mix(in srgb, var(--accent-color), transparent 92%);
-      border: 1px solid color-mix(in srgb, var(--accent-color), transparent 70%);
-    }
-
-    h3 {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--heading-color);
-      margin: 0 0 6px;
-    }
-
-    p {
-      margin: 0;
-      a {
-        color: var(--default-color);
-        text-decoration: none;
-        word-break: break-word;
-
-        &:hover { color: var(--accent-color); }
-      }
-    }
-
-    &:hover {
-      transform: translateY(-3px);
-      border-color: color-mix(in srgb, var(--accent-color), transparent 65%);
-      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.08);
-    }
+  .contact-reveal.is-visible {
+    opacity: 1;
+    transform: translateX(0) translateY(0) scale(1);
+    filter: blur(0);
   }
 }
 </style>

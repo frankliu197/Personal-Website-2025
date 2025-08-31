@@ -1,132 +1,68 @@
 <template lang="pug">
-section#services.services.section
-  .container.section-title
-    h2 Services
-    p What I can help you with
+section#services
+  .section-header
+    .title Services
+    .subtitle What I bring to the table
 
   .container
-    .row.gy-4
-      .col-lg-4.col-md-6(
+    .row.g-4
+      .col-lg-4.col-md-6.service-reveal(
         v-for="(s, i) in services"
         :key="i"
+        v-reveal="{ idx: i, step: 80 }"
       )
-        .service-item.position-relative
-          .icon
-            component(:is="s.icon" size="28" stroke-width="2" aria-hidden="true")
-          a.stretched-link(href="#")
-            h3 {{ s.title }}
-          p {{ s.desc }}
+        FLCard(:icon="s.icon" :title="s.title" :desc="s.desc")
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { Activity, Box, Presentation, MapPin, Camera, MessageSquareText } from "lucide-vue-next"
+import FLCard from '@/components/FLCard.vue'
+import { Code, Layers, Database, Globe, Users, Lightbulb } from 'lucide-vue-next'
 
-// All services in one object
 const services = [
-  {
-    icon: Activity,
-    title: 'Scalable Web Apps',
-    desc: 'Building performant, scalable, and maintainable frontend and backend systems.'
-  },
-  {
-    icon: Box,
-    title: 'System Design',
-    desc: 'Architecting distributed systems with efficiency, security, and resilience in mind.'
-  },
-  {
-    icon: Presentation,
-    title: 'Product Demos',
-    desc: 'Creating interactive product presentations and prototypes to validate ideas quickly.'
-  },
-  {
-    icon: MapPin,
-    title: 'Remote Collaboration',
-    desc: 'Helping teams deliver across time zones with async-first workflows and processes.'
-  },
-  {
-    icon: Camera,
-    title: 'Creative Media',
-    desc: 'Designing visuals, animations, and digital assets to support brand identity.'
-  },
-  {
-    icon: MessageSquareText,
-    title: 'Consulting & Mentorship',
-    desc: 'Guiding teams in best practices for software engineering, DevOps, and accessibility.'
-  }
+  { icon: Code,      title: 'Programming Languages',         desc: 'TypeScript, JavaScript, Python, Java, C, SQL.' },
+  { icon: Layers,    title: 'Frameworks & Libraries',        desc: 'Vue, React, Angular, Spring Boot, Flask, Express, Node.js.' },
+  { icon: Database,  title: 'Systems & Databases',           desc: 'Docker, Kubernetes, RabbitMQ, Redis, PostgreSQL, SQL, MongoDB.' },
+  { icon: Globe,     title: 'Human Languages',               desc: 'English, Mandarin. Intermediate Portuguese, French, Spanish.' },
+  { icon: Users,     title: 'Communication & Collaboration', desc: 'Mentoring, async-first workflows, clear writing and speaking.' },
+  { icon: Lightbulb, title: 'Creative & Problem Solving',    desc: 'Debugging, architecture, rapid prototyping, UX empathy.' }
 ]
 
 export default defineComponent({
   name: 'Services',
-  data() {
-    return { services }
-  }
+  components: { FLCard },
+  data() { return { services } },
 })
 </script>
 
 <style lang="scss">
 #services {
-  .row {
-  display: grid;
-  gap: 1.5rem;
-
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .service-reveal {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+    transition:
+      opacity .5s ease,
+      transform .5s ease,
+      box-shadow .2s ease;
+    will-change: opacity, transform;
   }
-  @media (min-width: 992px) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  
+  .service-reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
-}
-
-.service-item {
-  height: 100%;
-  background: var(--surface-color);
-  border: 1px solid color-mix(in srgb, var(--default-color), transparent 88%);
-  border-radius: 12px;
-  padding: 32px 24px;
-  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
-
-  .icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    margin-bottom: 16px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent-color);
-    background: color-mix(in srgb, var(--accent-color), transparent 92%);
-    border: 1px solid color-mix(in srgb, var(--accent-color), transparent 70%);
+  
+  .service-reveal.no-anim {
+    transition: none !important;
   }
 
-  h3 {
-    font-size: 20px;
-    font-weight: 700;
-    margin: 0 0 10px;
-    color: var(--heading-color);
-  }
-
-  p {
-    margin: 0;
-    color: var(--default-color);
-    line-height: 1.7;
-  }
-
-  .stretched-link {
-    position: static;
-    h3 { position: relative; z-index: 1; }
-  }
-
-  &:hover {
-    transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--accent-color), transparent 65%);
-    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.08);
-
-    .icon {
-      background: color-mix(in srgb, var(--accent-color), transparent 88%);
+  @media (prefers-reduced-motion: reduce) {
+    .service-reveal,
+    .service-reveal.is-visible {
+      transition: none !important;
+      opacity: 1 !important;
+      transform: none !important;
     }
   }
-}
-
 }
 </style>

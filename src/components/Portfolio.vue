@@ -1,7 +1,7 @@
 <template lang="pug">
 section#portfolio.portfolio.section
   // section title
-  .container.section-title
+  .container.section-header
     h2 Portfolio
     p Check my work
 
@@ -44,7 +44,6 @@ export default {
     items: {
       type: Array,
       default: () => ([
-        // sample data, swap for your images
         { id: 1, category: 'app',  title: 'App 1',  thumb: '/assets/img/portfolio/portfolio-1.jpg',  full: '/assets/img/portfolio/portfolio-1.jpg',  detailsHref: '' },
         { id: 2, category: 'web',  title: 'Web 1',  thumb: '/assets/img/portfolio/portfolio-2.jpg',  full: '/assets/img/portfolio/portfolio-2.jpg',  detailsHref: '' },
         { id: 3, category: 'card', title: 'Card 1', thumb: '/assets/img/portfolio/portfolio-3.jpg',  full: '/assets/img/portfolio/portfolio-3.jpg',  detailsHref: '' },

@@ -5,10 +5,10 @@
     <About />
     <Services />
     <Resume />
-    <Portfolio />
     <Contact />
 
     <FooterBar />
+    <FLScrollTop />
   </div>
 </template>
 
@@ -21,6 +21,7 @@ import Services from "./components/Services.vue";
 import Portfolio from "./components/Portfolio.vue";
 import Contact from "./components/Contact.vue";
 import FooterBar from "./components/FooterBar.vue";
+import FLScrollTop from "./components/FLScrollTop.vue";
 
 export default {
   name: "App",
@@ -33,6 +34,10 @@ export default {
     Portfolio,
     Contact,
     FooterBar,
+    FLScrollTop,
   },
 };
 </script>
+
+<style>
+</style>
