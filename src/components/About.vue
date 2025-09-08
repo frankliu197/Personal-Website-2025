@@ -31,7 +31,7 @@ section#about
 
         // new row: skills
         .row.mt-5.gx-5
-          .col-md-6
+          .col-lg-6
             .skills
               .header.mb-3 Skills
               .mb-4(
@@ -46,9 +46,9 @@ section#about
                   span.badge.tool(v-for="t in s.tools" :key="t") {{ t }}
                 p.proof.mt-2(v-if="s.proof") {{ s.proof }}
 
-          .col-md-6
+          .col-lg-6
             .skills
-              .header.mb-3.d-none.d-md-block &nbsp; <!-- empty header for alignment -->
+              .header.lg-3.d-none.d-lg-block &nbsp; <!-- empty header for alignment -->
               .mb-4(
                 v-for="(s, i) in secondColSkills"
                 :key="s.area"
