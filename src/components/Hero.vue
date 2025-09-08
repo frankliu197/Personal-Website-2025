@@ -35,7 +35,7 @@ export default defineComponent({
       wordIndex: 0,
       charIndex: 0,
       isDeleting: false,
-      timer: undefined
+      timer: undefined as number | undefined
     }
   },
   mounted() {

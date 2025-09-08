@@ -12,6 +12,7 @@ export default defineConfig({
     vueDevTools(),
     tailwind(),
   ],
+  base: process.env.NODE_ENV === "production" ? "/website-2/" : "/",
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
