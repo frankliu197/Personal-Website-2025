@@ -1,5 +1,8 @@
 <template lang="pug">
-#navbar.fixed-top(:class="{ 'mobile-nav-active': isMobileOpen }")
+#navbar.fixed-top(
+  :class="{ 'mobile-nav-active': isMobileOpen }"
+  v-lock-scroll.body="isMobileOpen"
+)
   header.header.bg-black.text-white.px-3(
     ref="headerEl"
     :class="{ 'shadow-sm': hasShadow }"
@@ -8,21 +11,23 @@
       a.logo.d-flex.align-items-center.text-decoration-none.text-white(href="#hero")
         h1.sitename.fw-bold.mb-0(style="font-size:30px") Frank Liu
 
-      nav.navmenu(position="navigation" v-nav-highlight)
+      nav.navmenu(
+        position="navigation"
+        v-nav-highlight="{ activeClass: 'active', defaultHash: '#hero' }"
+      )
         // desktop
         ul.d-none.d-xl-flex.list-unstyled.mb-0.gap-4.align-items-center
           li(v-for="item in menuItems" :key="item.href")
             a.nav-link.px-1.pb-1.d-inline-flex.align-items-center.text-white.text-decoration-none.position-relative(
               style="font-size:15px"
               :href="item.href"
-              :class="{ active: isActive(item.href) }"
             )
               span.label {{ item.key }}
 
         // mobile toggle
         button.mobile-nav-toggle.btn.btn-link.text-white.d-inline-flex.d-xl-none.ms-2(
           type="button"
-          @click="toggleMobile"
+          @click="isMobileOpen = !isMobileOpen"
           :aria-expanded="isMobileOpen.toString()"
           aria-controls="navmenu"
         )
@@ -30,25 +35,26 @@
 
   // full-width sheet below navbar
   transition(name="slide-right")
-    .mobile-sheet.d-xl-none(
+    .mobile-sheet.d-xl-none.pt-2(
       v-if="isMobileOpen"
       role="dialog"
       aria-modal="true"
       :style="{ top: 'var(--nav-h, 72px)' }"
     )
-      nav.sheet-links
+      nav.sheet-links(
+        v-nav-highlight="{ activeClass: 'active', defaultHash: '#hero' }"
+      )
         ul.list-unstyled.mb-0
           li(v-for="item in menuItems" :key="item.href")
             a.sheet-link.d-flex.align-items-center.px-4.py-3.text-decoration-none.text-white(
               :href="item.href"
-              :class="{ active: isActive(item.href) }"
-              @click="closeMobile"
+              @click="isMobileOpen = false"
             )
               span.label {{ item.key }}
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, onMounted, onBeforeUnmount } from 'vue'
 import { Menu, X } from 'lucide-vue-next'
 
 type MenuItem = { key: string; href: string }
@@ -58,7 +64,7 @@ const menuItems: MenuItem[] = [
   { key: 'About', href: '#about' },
   { key: 'Services', href: '#services' },
   { key: 'Resume', href: '#resume' },
-  // { key: 'Projects',  href: '#portfolio' },
+  // { key: 'Projects', href: '#portfolio' },
   { key: 'Contact', href: '#contact' }
 ]
 
@@ -71,13 +77,10 @@ export default defineComponent({
     return {
       isMobileOpen: false,
       hasShadow: false,
-      menuItems,
-      activeHash: '#hero' as string,
-      io: null as IntersectionObserver | null
+      menuItems
     }
   },
   mounted() {
-    // header shadow
     const header = this.$refs.headerEl as HTMLElement | undefined
     const onScroll = () => {
       if (!header) return
@@ -87,38 +90,13 @@ export default defineComponent({
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
 
-    // intersection observer for sections
-    const targets = this.menuItems
-      .map(i => document.getElementById(i.href.slice(1)))
-      .filter((el): el is HTMLElement => !!el)
-
-    this.io = new IntersectionObserver(
-      entries => {
-        // choose the most visible entry
-        const visible = entries
-          .filter(e => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
-
-        if (visible?.target?.id) {
-          this.activeHash = `#${visible.target.id}`
-        } else {
-          // near top fallback
-          if (window.scrollY < 120) this.activeHash = '#hero'
-        }
-      },
-      { root: null, rootMargin: '-40% 0px -50% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] }
-    )
-    targets.forEach(el => this.io!.observe(el))
+    // Save to remove later
+    ;(this as any)._onScroll = onScroll
   },
   beforeUnmount() {
-    this.io?.disconnect()
-    this.io = null
+    const onScroll = (this as any)._onScroll as (() => void) | undefined
+    if (onScroll) window.removeEventListener('scroll', onScroll)
   },
-  methods: {
-    toggleMobile() { this.isMobileOpen = !this.isMobileOpen },
-    closeMobile() { this.isMobileOpen = false },
-    isActive(href: string) { return this.activeHash === href }
-  }
 })
 </script>
 
