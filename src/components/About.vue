@@ -4,6 +4,7 @@ section#about
     .card.about-card 
       .card-body.p-4.p-md-5
         .row.gy-4.gx-5
+          // top row: profile + about
           .col-xl-6
             .row.gy-4.align-items-start
               .col-md-5
@@ -22,35 +23,46 @@ section#about
                   strong Phone: 
                   span {{ translations.phone }}
 
-            .skills
-              .header.mb-3.mt-5 Skills
-              .mb-3.skill-reveal(
-                v-for="(s, i) in translations.skills"
-                :key="s.label"
-                v-reveal="{ idx: i, step: 80 }"
-                :style="{ '--target': s.value + '%' }"
-              )
-                .d-flex.justify-content-between.align-items-center.text-uppercase.mb-1.fw-semibold
-                  span {{ s.label }}
-                  span.fw-bold {{ s.value }}%
-                .progress.skill-progress
-                  .progress-bar(
-                    role="progressbar"
-                    :aria-valuenow="s.value"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  )
-
           .col-xl-6.mt-5.mt-xl-0
             .about-me
               .section-title About me
               p {{ translations.about.p1 }}
               p {{ translations.about.p2 }}
-              p {{ translations.about.p3 }}
+
+        // new row: skills
+        .row.mt-5.gx-5
+          .col-md-6
+            .skills
+              .header.mb-3 Skills
+              .mb-4(
+                v-for="(s, i) in firstColSkills"
+                :key="s.area"
+                v-reveal="{ idx: i, step: 80 }"
+              )
+                .d-flex.justify-content-between.align-items-center.mb-1
+                  .text-uppercase.fw-semibold.small {{ s.area }}
+                  .badge.level(:class="'level-' + s.level.toLowerCase()") {{ s.level }}
+                .toolbox.mt-1
+                  span.badge.tool(v-for="t in s.tools" :key="t") {{ t }}
+                p.proof.mt-2(v-if="s.proof") {{ s.proof }}
+
+          .col-md-6
+            .skills
+              .header.mb-3.d-none.d-md-block &nbsp; <!-- empty header for alignment -->
+              .mb-4(
+                v-for="(s, i) in secondColSkills"
+                :key="s.area"
+                v-reveal="{ idx: i + firstColSkills.length, step: 80 }"
+              )
+                .d-flex.justify-content-between.align-items-center.mb-1
+                  .text-uppercase.fw-semibold.small {{ s.area }}
+                  .badge.level(v-if="s.level" :class="'level-' + s.level.toLowerCase()") {{ s.level }}
+                .toolbox.mt-1
+                  span.badge.tool(v-for="t in s.tools" :key="t") {{ t }}
+                p.proof.mt-2(v-if="s.proof") {{ s.proof }}
 </template>
 
 <script>
-
 import { defineComponent } from 'vue'
 import profileImage from '@/assets/img/profile.jpg'
 
@@ -60,25 +72,59 @@ const translations = {
   email: 'frankliu197@gmail.com',
   phone: '+1 (613) 322 6347',
   about: {
-    p1: "Coding is wild and unpredictable. Things break, things get messy, but that’s part of the charm. I like unraveling tangled problems and turning them into something clean, fast, and satisfying. It feels like playing detective, chasing down the pieces until everything clicks into place. That’s what makes coding fun for me. Whether it’s frontend, backend, architecture, or something algorithm heavy, I have the experience to handle it.",
-    p2: "Over the years, I’ve worked in several startups where I picked up a wide range of tools. I’ve used React, Vue, and Angular on the frontend, and Spring, Flask, and Node on the backend. I’ve worked with all kinds of people, in all kinds of conditions. Whether it’s a 2am emergency or a group session trying to keep a system from falling apart, it’s just another day in an engineer’s life",
-    p3: "You’ve got ambitious plans? Whether it’s full stack, architecture focused, machine learning, or even something technically sales driven, I’m in.",
+    p1: "I turn messy systems into fast, predictable products. I hunt bugs, remove bottlenecks, and ship clean interfaces that survive real users.",
+    p2: "Recent work: scaled a crawler with RabbitMQ and safe restarts, built a Vue proctoring UI with live terminal streaming, and tightened auth and caching for noisy traffic. If your roadmap is ambitious, I can help you land it."
   },
-  skills: [
-    { label: 'Front End Engineering', value: 98 },
-    { label: 'Back End Engineering', value: 95 },
-    { label: 'Full Stack Engineering', value: 95 },
-    { label: 'Data Engineering', value: 80 },
-    { label: 'Dev Ops', value: 60 }
+  skillGroups: [
+    {
+      area: 'Front End',
+      level: 'Expert',
+      tools: ['Vue', 'React', 'Angular', 'TypeScript', 'Pinia'],
+      proof: 'Built proctoring UI with live terminal streaming and custom perf fixes.'
+    },
+    {
+      area: 'Back End',
+      level: 'Expert',
+      tools: ['Node', 'Python', 'Flask', 'PostgreSQL', 'Redis', 'RabbitMQ', 'GraphQL'],
+      proof: 'Orchestrated distributed crawler jobs with safe restarts and queueing.'
+    },
+    {
+      area: 'Architecture',
+      level: 'Expert',
+      tools: ['Microservices', 'WebSockets', 'RabbitMq', 'Caching', 'Observability'],
+      proof: 'Turned monolith features into scalable services with metrics in place.'
+    },
+    {
+      area: 'DevOps',
+      level: 'Working',
+      tools: ['Docker', 'Kubernetes', 'Nginx', 'CI', 'Linux'],
+      proof: 'Containerized apps and tightened build times with sane caching.'
+    },
+    {
+      area: 'Accessibility',
+      tools: ['WCAG 2.1', 'VPAT'],
+      proof: 'Audited web apps, analyzed VPAT reports, and fixed 30+ accessibility bugs end-to-end.'
+    }
   ]
 }
-export default {
-  name: 'Frank Liu',
-  
+
+export default defineComponent({
+  name: 'AboutSection',
   data() {
     return { translations, profileImage }
+  },
+  computed: {
+    // Split skills evenly into two columns
+    firstColSkills() {
+      const mid = Math.ceil(this.translations.skillGroups.length / 2)
+      return this.translations.skillGroups.slice(0, mid)
+    },
+    secondColSkills() {
+      const mid = Math.ceil(this.translations.skillGroups.length / 2)
+      return this.translations.skillGroups.slice(mid)
+    }
   }
-}
+})
 </script>
 
 <style lang="scss">
@@ -97,52 +143,34 @@ export default {
     object-fit: cover;
   }
 
-  .skill-progress {
-    --bs-progress-height: 8px;
-    --bs-progress-bg: #e9ecef;
-    --bs-progress-border-radius: 0;
-
-    border-radius: 0;
-    box-shadow: none;
-
-    .progress-bar {
-      background-color: var(--accent-color, #0d6efd);
-      border-radius: 0;
-      box-shadow: none;
-
-      /* start at 0 until .is-visible arrives from directive */
-      width: 0%;
-      transition: width .8s ease;
-    }
-  }
-
-  /* When visible (down-scroll), animate width to target */
-  .skill-reveal.is-visible .progress-bar {
-    width: var(--target, 0%);
-  }
-
-  /* Up-scroll re-entry shows instantly (no transition) */
-  .skill-reveal.no-anim .progress-bar {
-    transition: none !important;
-  }
-
   .skills {
-    .d-flex span:first-child {
-      font-size: 0.75rem;
-      color: #6c757d;
-      font-weight: 600;
+    .badge.level {
+      font-size: .7rem;
+      padding: .25rem .5rem;
+      border-radius: 999px;
     }
-    .d-flex span:last-child {
-      font-size: 0.75rem;
-      color: var(--heading-color);
-      font-weight: 700;
-    }
-  }
+    .level-expert   { background: #e7f1ff; color: #0d6efd; }
+    .level-advanced { background: #eef9f0; color: #198754; }
+    .level-working  { background: #fff7e6; color: #fd7e14; }
 
-  p {
-    font-size: 18px;
-    line-height: 1.5;
-    margin-bottom: 1rem;
+    .toolbox {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .35rem .5rem;
+    }
+    .badge.tool {
+      background: #f1f3f5;
+      color: #495057;
+      font-weight: 600;
+      border-radius: 999px;
+      padding: .3rem .6rem;
+      font-size: .72rem;
+    }
+    .proof {
+      font-size: .85rem;
+      color: #6c757d;
+      margin: 0;
+    }
   }
 
   .section-title::after { margin: 0; }

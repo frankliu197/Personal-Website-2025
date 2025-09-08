@@ -2,7 +2,6 @@
 section#services
   .section-header
     .title Services
-    .subtitle What I bring to the table
 
   .container
     .row.g-4
@@ -17,15 +16,15 @@ section#services
 <script lang="ts">
 import { defineComponent } from 'vue'
 import FLCard from '@/components/FLCard.vue'
-import { Code, Layers, Database, Globe, Users, Lightbulb } from 'lucide-vue-next'
+import { Code, Layers, Database, Globe, Users, Lightbulb, Zap, Shield } from 'lucide-vue-next'
 
 const services = [
-  { icon: Code,      title: 'Programming Languages',         desc: 'TypeScript, JavaScript, Python, Java, C, SQL.' },
-  { icon: Layers,    title: 'Frameworks & Libraries',        desc: 'Vue, React, Angular, Spring Boot, Flask, Express, Node.js.' },
-  { icon: Database,  title: 'Systems & Databases',           desc: 'Docker, Kubernetes, RabbitMQ, Redis, PostgreSQL, SQL, MongoDB.' },
-  { icon: Globe,     title: 'Human Languages',               desc: 'English, Mandarin. Intermediate Portuguese, French, Spanish.' },
-  { icon: Users,     title: 'Communication & Collaboration', desc: 'Mentoring, async-first workflows, clear writing and speaking.' },
-  { icon: Lightbulb, title: 'Creative & Problem Solving',    desc: 'Debugging, architecture, rapid prototyping, UX empathy.' }
+  { icon: Code,     title: 'Web Development',          desc: 'Responsive, accessible, and fast websites built with modern frameworks.' },
+  { icon: Layers,   title: 'System Design',            desc: 'Scalable backends with microservices, queues, and caching strategies.' },
+  { icon: Zap,      title: 'Performance Optimization', desc: 'Profiling and tuning apps to eliminate bottlenecks across the stack.' },
+  { icon: Shield,   title: 'Accessibility Audits',     desc: 'Fixing WCAG issues and delivering inclusive user experiences.' },
+  { icon: Users,    title: 'Collaboration & Mentorship', desc: 'Leading projects, mentoring developers, async-first workflows.' },
+  { icon: Globe,    title: 'Multilingual Communication', desc: 'English, Mandarin, Portuguese, French, and Spanish for global collaboration.' }
 ]
 
 export default defineComponent({
