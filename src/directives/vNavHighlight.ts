@@ -1,84 +1,110 @@
 import type { ObjectDirective, DirectiveBinding } from 'vue'
 
-/**
- * Options for v-nav-highlight
- * ----------------------------
- * - linksSelector: CSS selector to find nav links (default: 'a[href^="#"]')
- * - activeClass: CSS class to apply to the active link (default: 'active')
- * - defaultHash: fallback hash if nothing is visible (default: '#hero')
- */
 type Options = {
   linksSelector?: string
   activeClass?: string
   defaultHash?: string
+  offsetPx?: number    // distance from top used as the reference line
 }
 
 type State = {
   opts: Required<Options>
-  io: IntersectionObserver | null
-  activeHash: string
+  links: HTMLAnchorElement[]
+  sections: HTMLElement[]
+  ticking: boolean
+  onScroll: () => void
+  onResize: () => void
+  ro?: ResizeObserver
+}
+
+function getHash(a: HTMLAnchorElement) {
+  const href = a.getAttribute('href') || ''
+  return href.startsWith('#') ? href : ''
 }
 
 export const vNavHighlight: ObjectDirective<HTMLElement, Options> = {
   mounted(el, binding: DirectiveBinding<Options>) {
-    // Merge user options with defaults
     const opts: Required<Options> = {
       linksSelector: binding.value?.linksSelector ?? 'a[href^="#"]',
       activeClass: binding.value?.activeClass ?? 'active',
       defaultHash: binding.value?.defaultHash ?? '#hero',
+      offsetPx: binding.value?.offsetPx ?? 100,  // tweak for your navbar height
     }
 
-    // Grab all links inside the nav
-    const links = Array.from(el.querySelectorAll<HTMLAnchorElement>(opts.linksSelector))
+    const links = Array.from(
+      el.querySelectorAll<HTMLAnchorElement>(opts.linksSelector)
+    ).filter(a => !!getHash(a))
 
-    // For each link, get the target section element by ID
-    const sections = links
-      .map(link => document.getElementById(link.getAttribute('href')?.slice(1) ?? ''))
-      .filter((s): s is HTMLElement => !!s)
+    const sections: HTMLElement[] = links
+      .map(a => document.getElementById(getHash(a).slice(1) || ''))
+      .filter((n): n is HTMLElement => !!n)
 
-    // Store directive state on the element
-    const state: State = { opts, io: null, activeHash: opts.defaultHash }
+    // Pre-sort by document order (offsetTop ascending)
+    sections.sort((a, b) => a.offsetTop - b.offsetTop)
+
+    const state: State = {
+      opts, links, sections, ticking: false,
+      onScroll: () => {},
+      onResize: () => {},
+    }
     ;(el as any)._navHighlight = state
 
-    // Helper to apply active class to the correct link
     const setActive = (hash: string) => {
-      state.activeHash = hash
-      links.forEach(l => {
-        if (l.getAttribute('href') === hash) l.classList.add(opts.activeClass)
-        else l.classList.remove(opts.activeClass)
+      for (const a of links) {
+        if (getHash(a) === hash) a.classList.add(opts.activeClass)
+        else a.classList.remove(opts.activeClass)
+      }
+      // Sync mobile sheet links too (if you attached directive there as well)
+    }
+
+    const computeActive = () => {
+      const line = window.scrollY + opts.offsetPx
+      // Find the last section whose top is above the line
+      let chosenHash = opts.defaultHash
+      for (let i = 0; i < sections.length; i++) {
+        if (sections[i].offsetTop <= line) {
+          chosenHash = `#${sections[i].id}`
+        } else {
+          break
+        }
+      }
+      setActive(chosenHash)
+    }
+
+    const raf = (fn: () => void) => {
+      if (state.ticking) return
+      state.ticking = true
+      requestAnimationFrame(() => {
+        state.ticking = false
+        fn()
       })
     }
 
-    // IntersectionObserver watches when sections come into view
-    state.io = new IntersectionObserver(
-      entries => {
-        // Find the most visible section (highest intersectionRatio)
-        const visible = entries
-          .filter(e => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+    state.onScroll = () => raf(computeActive)
+    state.onResize = () => raf(() => {
+      // Re-sort in case layout changed
+      sections.sort((a, b) => a.offsetTop - b.offsetTop)
+      computeActive()
+    })
 
-        if (visible?.target?.id) {
-          // Update active link if a section is visible
-          setActive(`#${visible.target.id}`)
-        } else if (window.scrollY < 120) {
-          // Near the top → fallback to default hash
-          setActive(opts.defaultHash)
-        }
-      },
-      {
-        root: null,
-        // rootMargin shrinks/grows the "viewport" used for intersection checks
-        rootMargin: '-40% 0px -50% 0px',
-        threshold: [0, 0.25, 0.5, 0.75, 1], // trigger at different visibility levels
-      }
-    )
+    window.addEventListener('scroll', state.onScroll, { passive: true })
+    window.addEventListener('resize', state.onResize)
 
-    // Start observing each section
-    sections.forEach(sec => state.io!.observe(sec))
+    // Keep positions up to date for content changes
+    if ('ResizeObserver' in window) {
+      state.ro = new ResizeObserver(() => state.onResize())
+      sections.forEach(sec => state.ro!.observe(sec))
+    }
+
+    // Initial highlight
+    computeActive()
   },
+
   beforeUnmount(el) {
-    // Cleanup observer when directive is unmounted
-    const state: State | undefined = (el as any)._navHighlight
-    if (state?.io) state.io.disconnect()
+    const state = (el as any)._navHighlight as State | undefined
+    if (!state) return
+    window.removeEventListener('scroll', state.onScroll)
+    window.removeEventListener('resize', state.onResize)
+    state.ro?.disconnect()
   }
 }

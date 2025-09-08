@@ -96,12 +96,13 @@ const translations = {
     },
     {
       area: 'DevOps',
-      level: 'Working',
+      level: 'Solid',
       tools: ['Docker', 'Kubernetes', 'Nginx', 'CI', 'Linux'],
       proof: 'Containerized apps and tightened build times with sane caching.'
     },
     {
       area: 'Accessibility',
+      level: 'Expert',
       tools: ['WCAG 2.1', 'VPAT'],
       proof: 'Audited web apps, analyzed VPAT reports, and fixed 30+ accessibility bugs end-to-end.'
     }
@@ -150,8 +151,7 @@ export default defineComponent({
       border-radius: 999px;
     }
     .level-expert   { background: #e7f1ff; color: #0d6efd; }
-    .level-advanced { background: #eef9f0; color: #198754; }
-    .level-working  { background: #fff7e6; color: #fd7e14; }
+    .level-solid { background: #eef9f0; color: #198754; }
 
     .toolbox {
       display: flex;
